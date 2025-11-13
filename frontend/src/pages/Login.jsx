@@ -72,25 +72,26 @@ const handleSubmit = async (e) => {
               className="w-full pl-10 p-3 border border-gray-300 rounded-lg bg-white/60 text-gray-900 placeholder-gray-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             />
           </div>
+<div className="relative">
+  <FaLock className="absolute left-3 top-3.5 text-gray-800 z-10" />
 
-          <div className="relative">
-            <FaLock className="absolute left-3 top-3.5 text-gray-800" />
-            <input
-              name="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              className="w-full pl-10 pr-10 p-3 border border-gray-300 rounded-lg bg-white/60 text-gray-900 placeholder-gray-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            />
-            <div
-              className="absolute right-3 top-3.5 text-gray-800 cursor-pointer hover:text-indigo-600"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </div>
-          </div>
+  <input
+    name="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    value={form.password}
+    onChange={handleChange}
+    required
+    className="w-full pl-10 pr-12 p-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+  />
+
+  <div
+    className="absolute right-3 top-3.5 text-gray-800 cursor-pointer hover:text-indigo-600 z-20"
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </div>
+</div>
 
           <button
             type="submit"

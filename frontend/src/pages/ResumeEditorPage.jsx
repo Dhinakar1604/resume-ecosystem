@@ -10,8 +10,9 @@ import logo from "/src/assets/quickcv-logo.svg";
 
 export default function ResumeEditorPage() {
   const navigate = useNavigate();
-  const [resumeData, setResumeData] = useState(null);
-  const [loading, setLoading] = useState(true);
+ const [resumeData, setResumeData] = useState(null);
+const [loading, setLoading] = useState(true);
+const [aiLoading, setAiLoading] = useState(false); 
 
   const handleLogout = () => {
     localStorage.clear();
@@ -122,6 +123,7 @@ const generateSummary = async () => {
     const token = localStorage.getItem("token");
     if (!token) return navigate("/login");
 
+    setAiLoading(true);  // start loader
     toast.info("Generating AI summary...");
 
     const res = await axios.post(
@@ -130,7 +132,7 @@ const generateSummary = async () => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    console.log("AI result:", res.data.result); 
+    console.log("AI result:", res.data.result);
 
     setResumeData(prev => ({
       ...prev,
@@ -141,8 +143,11 @@ const generateSummary = async () => {
   } catch (err) {
     console.error(err.response?.data || err.message);
     toast.error("Failed to generate summary.");
+  } finally {
+    setAiLoading(false); 
   }
 };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-xl font-semibold text-white">
@@ -166,40 +171,65 @@ const generateSummary = async () => {
   }
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
-      <ToastContainer />
-      <header className="flex justify-between items-center px-6 py-4 bg-white/10 backdrop-blur-md border-b border-gray-700 shadow-lg text-white">
-        <h1 className="text-3xl font-bold tracking-wide">
-            <span className="text-white">Quick</span>
-          <span className="text-gray-400">CV</span>
-        </h1>
-        <div className="flex gap-4">
-          <button
-            onClick={saveResume}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition duration-300"
-          >
-            <FaSave /> Save
-          </button>
-<button
-  onClick={() => downloadPDF(resumeData, resumeData?.name)}
-  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition duration-300"
->
-  Download PDF
-</button>
+    <ToastContainer 
+  theme="dark"
+  position="top-center"
+  autoClose={3000}
+/>
 
+ <header className="relative z-40 flex items-center justify-between px-8 py-6 bg-zinc-900/70 backdrop-blur-xl border-b border-zinc-800 shadow animate-slide-up">
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition duration-300"
-          >
-            <FaSignOutAlt /> Logout
-          </button>
-        </div>
-      </header>
+  <div className="flex items-center gap-3">
+    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/40">
+      <img src={logo} className="w-8 h-8" />
+    </div>
+
+    <h1 className="text-3xl font-extrabold tracking-tight">
+      <span className="text-white">Quick</span>
+      <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+        CV
+      </span>
+    </h1>
+  </div>
+
+  <div className="flex items-center gap-4">
+
+    <button
+      onClick={() => navigate(-1)}
+     className="px-5 py-2.5 bg-white text-black font-medium rounded-xl border border-gray-300 hover:bg-gray-100 transition shadow"
+
+    >
+      ← Back
+    </button>
+
+    <button
+      onClick={saveResume}
+      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 rounded-xl text-white font-semibold shadow shadow-emerald-500/40 transition"
+    >
+      <FaSave /> Save
+    </button>
+
+    <button
+      onClick={() => downloadPDF(resumeData)}
+      className="flex items-center gap-2 px-5 py-2.5 bg-blue-600/80 hover:bg-blue-700 rounded-xl text-white font-semibold transition"
+    >
+      Download PDF
+    </button>
+
+    <button
+      onClick={handleLogout}
+      className="flex items-center gap-2 px-5 py-2.5 bg-red-700/70 hover:bg-red-600 rounded-xl border border-red-800/50 text-white transition"
+    >
+      <FaSignOutAlt /> Logout
+    </button>
+  </div>
+</header>
+
 
       <div className="flex flex-grow flex-col md:flex-row p-6 gap-6">
-        <div
-          className="w-full md:w-1/2 p-6 rounded-3xl bg-black relative flex flex-col overflow-y-auto"
-        >
+       <div className="w-full md:w-1/2 p-6 rounded-3xl bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/60 
+shadow-[0_0_25px_rgba(6,182,212,0.3)] relative flex flex-col overflow-y-auto transition-all">
+
 <img
   src={logo}
   alt="Background Logo"
@@ -262,13 +292,26 @@ const generateSummary = async () => {
     }
   />
   <div className="flex justify-end mt-2">
-  <button
+<button
   onClick={generateSummary}
-  disabled={!resumeData.summary || resumeData.summary.trim() === ""}
-  className="bg-white text-black px-4 py-2 rounded-full hover:bg-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+  disabled={aiLoading || !resumeData.summary.trim()}
+  className={`px-5 py-2.5 rounded-full font-semibold transition 
+    ${
+      aiLoading
+        ? "bg-zinc-800/60 cursor-not-allowed text-white border border-cyan-400/50"
+        : "bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white shadow shadow-cyan-500/40"
+    }`}
 >
-  Generate with AI ✨
+  {aiLoading ? (
+    <div className="flex items-center gap-2">
+      <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+      Processing…
+    </div>
+  ) : (
+    "Generate with AI ✨"
+  )}
 </button>
+
 
   </div>
 </div>

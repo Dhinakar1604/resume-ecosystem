@@ -3,7 +3,7 @@ import axios from "axios";
 
 const router = express.Router();
 
-router.post("/ai-improve", async (req, res) => {
+router.post("/ai-improve", async (req, res) => { 
   const { text, summaryType } = req.body; 
 
   if (!text || text.trim() === "") {
